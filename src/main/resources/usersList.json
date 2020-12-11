@@ -1,0 +1,16 @@
+[
+  {
+    "email": "sergii.udaltsov@gmail.com",
+    "firstName": "Sergii",
+    "lastName": "Sergii",
+    "gender": "male",
+    "birthday": 1601126233
+  },
+  {
+    "email": "gudaltsova@gmail.com",
+    "firstName": "Galyna",
+    "lastName": "Udaltsova",
+    "gender": "female",
+    "birthday": 1601126233
+  }
+]

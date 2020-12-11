@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Users</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+          integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+</head>
+<body>
+<div class="container">
+    <div class="row">
+        <div class="col-md-10" style="margin-top: 10px;">
+            <table class="table table-striped" id="clientsTable">
+                <thead class="thead-dark">
+                <tr>
+                    <th id="userEmail" scope="col" style="width: 50px; text-align: center;">Email</th>
+                    <th id="firstName" scope="col" style="width: 300px; text-align: center;">First name</th>
+                    <th id="lastName" scope="col" style="width: 300px; text-align: center;">Last name</th>
+                    <th id="gender" scope="col" style="width: 300px; text-align: center;">Gender</th>
+                    <th id="birth" scope="col" style="width: 300px; text-align: center;">Birthday</th>
+                </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+            <div class="row" style="margin-top: 10px; margin-left: auto; margin-right: 0;">
+                <div>
+                    <button id="newUser">New user</button>
+                </div>
+                <div >
+                    <button id="home">Home</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="../../js/user/ListUsers.js"></script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+docker exec –it amlin /bin/bash
+docker start amlin /bin/bash
+docker cp C:\Users\Serhii_Udaltsov\.ssh\ansKeyDevUdal.pem amlin:/ansible/ansKeyDevUdal.pem
+
+
+
+
+
+win pass K5dbaBJGpQFNE17yDGlOfs1U2DrAH35lKlNsTwx148DglkRu7xu1eUW6CukDQ4tR9chrNwJ/qiYG0zJtVtShXzZsGKVLyl4O+/TShHren5fNl4YT/qLythGfMDVemwi1QhjKPKt81uz+L/L0PQ7LABGo8pSiQjJ+MGnt0c8jwzL+Tb6kiduTyRw7JY08Ej72N1UFn/xL7ZIXuv51Kz/usEHVSz1qe0mmJT3T+HhFqxAXykG/MOpAbwWCqvvRHmlxBXQIP9I9qeuD7NPjcvrf+5hDCAtbWPGVjEGKnEZ2UjnGoZFqKx+xF/+yy+YwNS46FUcxGbzxBHqdxmYd3X6oFA==
+win pass2 6pudtogG()trfHD3mshF;H!gL;Ed4gq-
