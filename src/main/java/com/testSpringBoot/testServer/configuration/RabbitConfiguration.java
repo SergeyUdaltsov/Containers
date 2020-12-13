@@ -1,22 +1,19 @@
 package com.testSpringBoot.testServer.configuration;
 
 
-import com.testSpringBoot.testServer.amqp.executor.IRabbitSender;
-import com.testSpringBoot.testServer.amqp.executor.impl.RabbitSender;
-import com.testSpringBoot.testServer.amqp.executor.impl.SpringBootRabbitListener;
-import com.testSpringBoot.testServer.amqp.executor.impl.SpringBootRabbitSender;
-import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+import com.testSpringBoot.testServer.amqp.executor.IRabbitExecutor;
+import com.testSpringBoot.testServer.amqp.executor.impl.RabbitExecutor;
+import com.testSpringBoot.testServer.amqp.processor.IProcessorFactory;
+import org.springframework.amqp.core.AcknowledgeMode;
 import org.springframework.amqp.core.AmqpTemplate;
-import org.springframework.amqp.core.Binding;
-import org.springframework.amqp.core.BindingBuilder;
-import org.springframework.amqp.core.DirectExchange;
-import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.amqp.rabbit.listener.MessageListenerContainer;
-import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
+import org.springframework.amqp.support.converter.ContentTypeDelegatingMessageConverter;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
+import org.springframework.amqp.support.converter.SimpleMessageConverter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,53 +25,60 @@ import org.springframework.context.annotation.Configuration;
 public class RabbitConfiguration {
 
     @Bean
-    Queue queue(@Value("${request.queue.name}") String queueName){
-        return new Queue(queueName, false);
-    }
-
-    @Bean
-    DirectExchange exchange(@Value("${exchange.name}") String exchange) {
-        return new DirectExchange(exchange);
-    }
-
-    @Bean
-    Binding binding(@Value("${routing.key}") String routingKey, Queue queue, DirectExchange exchange) {
-        return BindingBuilder.bind(queue).to(exchange).with(routingKey);
-    }
-
-    @Bean
-    public MessageConverter jsonMessageConverter() {
-        return new Jackson2JsonMessageConverter();
-    }
-
-    @Bean
-    ConnectionFactory connectionFactory(@Value("${rabbit.user.name}") String userName,
-                                        @Value("${rabbit.password}") String password) {
-        return new CachingConnectionFactory("localhost",
-                5672);
-    }
-
-
-    @Bean
-    public AmqpTemplate rabbitAmqpTemplate(ConnectionFactory connectionFactory) {
+    public AmqpTemplate rabbitAmqpTemplate(ConnectionFactory connectionFactory,
+                                           MessageConverter messageConverter) {
         final RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
-        rabbitTemplate.setMessageConverter(jsonMessageConverter());
+        rabbitTemplate.setMessageConverter(messageConverter);
+        rabbitTemplate.setRoutingKey("serg-sync");
+        rabbitTemplate.setExchange("serg-exchange");
         return rabbitTemplate;
     }
 
     @Bean
-    public IRabbitSender rabbitExecutor(AmqpTemplate rabbitTemplate,
-                                        @Value("${exchange.name}") String exchange) {
-        return new SpringBootRabbitSender(rabbitTemplate, exchange);
+    public IRabbitExecutor rabbitExecutor(AmqpTemplate rabbitAmqpTemplate,
+                                          IProcessorFactory processorFactory) {
+        return new RabbitExecutor(rabbitAmqpTemplate, processorFactory);
     }
 
     @Bean
-    MessageListenerContainer messageListenerContainer(ConnectionFactory connectionFactory, Queue queue) {
-        SimpleMessageListenerContainer simpleMessageListenerContainer = new SimpleMessageListenerContainer();
-        simpleMessageListenerContainer.setConnectionFactory(connectionFactory);
-        simpleMessageListenerContainer.setQueues(queue);
-        simpleMessageListenerContainer.setMessageListener(new SpringBootRabbitListener());
-        return simpleMessageListenerContainer;
-
+    ConnectionFactory connectionFactory(@Value("${rabbit.host}") String rabbitHost,
+                                        @Value("${rabbit.virtual.host}") String virtHost,
+                                        @Value("${rabbit.port}") int rabbitPort) {
+        CachingConnectionFactory connectionFactory =
+                new CachingConnectionFactory(rabbitHost, rabbitPort);
+        connectionFactory.setVirtualHost(virtHost);
+        return connectionFactory;
     }
+
+    @Bean("listenerContainerFactory")
+    public SimpleRabbitListenerContainerFactory ownershipListenerContainer(ConnectionFactory connectionFactory,
+                                                                           ContentTypeDelegatingMessageConverter contentTypeDelegatingMessageConverter) {
+        SimpleRabbitListenerContainerFactory container = new SimpleRabbitListenerContainerFactory();
+        container.setConnectionFactory(connectionFactory);
+        container.setAcknowledgeMode(AcknowledgeMode.AUTO);
+        container.setDefaultRequeueRejected(false);
+        container.setMessageConverter(contentTypeDelegatingMessageConverter);
+        container.setAutoStartup(true);
+        return container;
+    }
+
+    @Bean
+    public ContentTypeDelegatingMessageConverter messageConverter(Jackson2JsonMessageConverter jackson2JsonMessageConverter,
+                                                                  SimpleMessageConverter simpleMessageConverter) {
+        ContentTypeDelegatingMessageConverter contentTypeDelegatingMessageConverter = new ContentTypeDelegatingMessageConverter();
+        contentTypeDelegatingMessageConverter.addDelegate("application/json", jackson2JsonMessageConverter);
+        contentTypeDelegatingMessageConverter.addDelegate("text/plain", simpleMessageConverter);
+        return contentTypeDelegatingMessageConverter;
+    }
+
+    @Bean
+    public Jackson2JsonMessageConverter jackson2JsonMessageConverter() {
+        return new Jackson2JsonMessageConverter();
+    }
+
+    @Bean
+    public SimpleMessageConverter simpleMessageConverter() {
+        return new SimpleMessageConverter();
+    }
+
 }
