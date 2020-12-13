@@ -1,0 +1,32 @@
+version: "2.3"
+
+services:
+#  app:
+#    build:
+#      context: ../
+#      dockerfile: docker/DockerFile
+#    ports:
+#      - 8080:8080
+  mongodb:
+    image: mongo:3.4
+    ports:
+      - 27018:27017
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: serg
+      MONGO_INITDB_ROOT_PASSWORD: serg
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - 5673:5672
+      - 15673:15672
+#    networks:
+#      - m3-network
+#    volumes:
+#      - rabbitmq-data:/data
+    restart: always
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+      RABBITMQ_DEFAULT_VHOST: local_vhost
+      RABBITMQ_USE_LONGNAME: "true"

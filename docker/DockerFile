@@ -1,0 +1,4 @@
+FROM openjdk:8-jdk-alpine
+VOLUME /tmp
+COPY target/docker-app.jar /docker-app.jar
+CMD ["java", "-jar", "/docker-app.jar"]
